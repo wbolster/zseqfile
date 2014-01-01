@@ -42,11 +42,10 @@ def make_process_wrapper(args, mode, encoding, errors, newline):
     process = subprocess.Popen(args, stdout=subprocess.PIPE)
     # FIXME: properly terminate the process when .close() is called
 
-    fp = process.stdout
     if 't' in mode:
-        fp = io.TextIOWrapper(
-            fp, encoding=encoding, errors=errors, newline=newline)
-    return fp
+        return io.TextIOWrapper(process.stdout, encoding, errors, newline)
+    else:
+        return process.stdout
 
 
 def open_regular(file, mode, encoding, errors, newline, external, parallel):
