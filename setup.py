@@ -7,4 +7,8 @@ setup(
     url="https://github.com/wbolster/zseqfile",
     version='0.1',
     py_modules=['zseqfile'],
+    license="BSD License",
+    classifiers=[
+        "License :: OSI Approved :: BSD License",
+    ]
 )
