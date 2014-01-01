@@ -39,3 +39,5 @@ Issues, notes, ideas
 
 * Maybe add "magical" file discovery by trying to open the file using a name
   with an added extension?
+
+* Support usage as context manager in all cases
