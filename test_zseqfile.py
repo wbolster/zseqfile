@@ -5,6 +5,8 @@ import io
 import lzma
 import os
 
+import pytest
+
 import zseqfile
 
 
@@ -42,3 +44,8 @@ def test_open(tmpdir):
         fp = zseqfile.open(fn, 'rb')
         assert fp.read() == data_binary
         fp.close()
+
+
+def test_valid_mode():
+    with pytest.raises(ValueError):
+        zseqfile.open('', mode='x')

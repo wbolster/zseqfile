@@ -9,9 +9,8 @@ import lzma
 import os
 
 
-#
-# Helper functions
-#
+SUPPORTED_MODES = {'rt', 'rb', 'wt', 'wb'}
+
 
 def is_executable_file(path):
     """Check whether the specified path is an executable file."""
@@ -70,7 +69,11 @@ SUFFIX_MAP = {
 # Public API
 #
 
-def open(file, mode='r', encoding=None, errors=None, newline=None):
+def open(file, mode='rt', *, encoding=None, errors=None, newline=None):
+
+    if mode not in SUPPORTED_MODES:
+        msg = "Unsupported mode {!r}, must be one of {}"
+        raise ValueError(msg.format(mode, ", ".join(sorted(SUPPORTED_MODES))))
 
     opener = open_regular
     for suffix, func in SUFFIX_MAP.items():
