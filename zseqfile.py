@@ -37,24 +37,25 @@ def which(executable):
     return None
 
 
-def open_regular(file, mode, encoding, errors, newline):
-    return io.open(file, mode=mode, encoding=encoding, errors=errors,
-                   newline=newline)
+def open_regular(file, mode, encoding, errors, newline, external, parallel):
+    # Simply ignore 'external' and 'parallel' args
+    return io.open(
+        file, mode=mode, encoding=encoding, errors=errors, newline=newline)
 
 
-def open_gzip(file, mode, encoding, errors, newline):
-    return gzip.open(file, mode=mode, encoding=encoding, errors=errors,
-                     newline=newline)
+def open_gzip(file, mode, encoding, errors, newline, external, parallel):
+    return gzip.open(
+        file, mode=mode, encoding=encoding, errors=errors, newline=newline)
 
 
-def open_bzip2(file, mode, encoding, errors, newline):
-    return bz2.open(file, mode=mode, encoding=encoding, errors=errors,
-                    newline=newline)
+def open_bzip2(file, mode, encoding, errors, newline, external, parallel):
+    return bz2.open(
+        file, mode=mode, encoding=encoding, errors=errors, newline=newline)
 
 
-def open_lzma(file, mode, encoding, errors, newline):
-    return lzma.open(file, mode=mode, encoding=encoding, errors=errors,
-                     newline=newline)
+def open_lzma(file, mode, encoding, errors, newline, external, parallel):
+    return lzma.open(
+        file, mode=mode, encoding=encoding, errors=errors, newline=newline)
 
 
 SUFFIX_MAP = {
@@ -69,7 +70,8 @@ SUFFIX_MAP = {
 # Public API
 #
 
-def open(file, mode='rt', *, encoding=None, errors=None, newline=None):
+def open(file, mode='rt', *, encoding=None, errors=None, newline=None,
+         external=False, parallel=False):
 
     if mode not in SUPPORTED_MODES:
         msg = "Unsupported mode {!r}, must be one of {}"
@@ -80,4 +82,4 @@ def open(file, mode='rt', *, encoding=None, errors=None, newline=None):
         if file.endswith(suffix):
             opener = func
 
-    return opener(file, mode, encoding, errors, newline)
+    return opener(file, mode, encoding, errors, newline, external, parallel)
