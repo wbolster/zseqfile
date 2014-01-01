@@ -7,6 +7,7 @@ import gzip
 import io
 import lzma
 import os
+import subprocess
 
 
 SUPPORTED_MODES = {'rt', 'rb', 'wt', 'wb'}
@@ -37,6 +38,17 @@ def which(executable):
     return None
 
 
+def make_process_wrapper(args, mode, encoding, errors, newline):
+    process = subprocess.Popen(args, stdout=subprocess.PIPE)
+    # FIXME: properly terminate the process when .close() is called
+
+    fp = process.stdout
+    if 't' in mode:
+        fp = io.TextIOWrapper(
+            fp, encoding=encoding, errors=errors, newline=newline)
+    return fp
+
+
 def open_regular(file, mode, encoding, errors, newline, external, parallel):
     # Simply ignore 'external' and 'parallel' args
     return io.open(
@@ -44,16 +56,49 @@ def open_regular(file, mode, encoding, errors, newline, external, parallel):
 
 
 def open_gzip(file, mode, encoding, errors, newline, external, parallel):
+    executable = None
+    if external:
+        if parallel:
+            executable = which('pigz')
+        if executable is None:
+            executable = which('gzip')
+
+    if executable is not None:
+        return make_process_wrapper(
+            [executable, '-c', '-d', file],
+            mode, encoding=encoding, errors=errors, newline=newline)
+
     return gzip.open(
         file, mode=mode, encoding=encoding, errors=errors, newline=newline)
 
 
 def open_bzip2(file, mode, encoding, errors, newline, external, parallel):
+    executable = None
+    if external:
+        if parallel:
+            executable = which('pbzip2')
+        if executable is None:
+            executable = which('bzip2')
+
+    if executable is not None:
+        return make_process_wrapper(
+            [executable, '-c', '-d', file],
+            mode, encoding=encoding, errors=errors, newline=newline)
+
     return bz2.open(
         file, mode=mode, encoding=encoding, errors=errors, newline=newline)
 
 
 def open_lzma(file, mode, encoding, errors, newline, external, parallel):
+    executable = None
+    if external:
+        executable = which('xz')
+
+    if executable is not None:
+        return make_process_wrapper(
+            [executable, '-c', '-d', file],
+            mode, encoding=encoding, errors=errors, newline=newline)
+
     return lzma.open(
         file, mode=mode, encoding=encoding, errors=errors, newline=newline)
 
