@@ -2,6 +2,7 @@
 import bz2
 import gzip
 import io
+import itertools
 import lzma
 import os
 
@@ -33,15 +34,18 @@ def test_open(tmpdir):
     with lzma.open(xz_file, 'wt') as fp:
         fp.write(data_text)
 
-    for fn in (regular_file, gzip_file, bzip2_file, xz_file):
+    for fn, external, parallel in itertools.product(
+            (regular_file, gzip_file, bzip2_file, xz_file),
+            (True, False),
+            (True, False)):
 
         # Text mode
-        fp = zseqfile.open(fn, 'rt')
+        fp = zseqfile.open(fn, 'rt', external=external, parallel=parallel)
         assert fp.read() == data_text
         fp.close()
 
         # Binary mode
-        fp = zseqfile.open(fn, 'rb')
+        fp = zseqfile.open(fn, 'rb', external=external, parallel=parallel)
         assert fp.read() == data_binary
         fp.close()
 
