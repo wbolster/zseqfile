@@ -13,7 +13,6 @@ files, either for reading or writing.
 It can optionally use external programs for compression/decompression, which
 might increase performance if you have multiple CPUs (or CPU cores).
 
-
 The supported compression formats are:
 
 * gzip (`.gz`)
@@ -22,8 +21,8 @@ The supported compression formats are:
 * lzma (`.lzma`)
 
 
-Issues/ notes / ideas
-=====================
+Issues, notes, ideas
+====================
 
 * Only Python >= 3.3 is currently supported
 
