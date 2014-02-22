@@ -55,6 +55,10 @@ def make_process_wrapper(args, mode, encoding, errors, newline):
         return process.stdout
 
 
+#
+# Uncompressed files
+#
+
 def open_regular(file, mode, encoding, errors, newline, external, parallel):
     # Simply ignore 'external' and 'parallel' args
     return io.open(
@@ -64,7 +68,6 @@ def open_regular(file, mode, encoding, errors, newline, external, parallel):
 #
 # Gzip
 #
-
 
 def open_external_gzip(file, mode, encoding, errors, newline):
     assert EXTERNAL_GZIP
