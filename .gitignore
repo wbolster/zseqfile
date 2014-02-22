@@ -1,0 +1,10 @@
+# Python stuff
+*.py[co]
+__pycache__/
+
+# Packaging stuff
+*.egg-info/
+
+# Testing stuff
+.coverage
+.tox/
