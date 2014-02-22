@@ -1,7 +1,3 @@
-"""
-zseqfile - transparently handle compressed files
-"""
-
 import bz2
 import gzip
 import io
@@ -109,10 +105,6 @@ SUFFIX_MAP = {
     '.lzma': open_lzma,
 }
 
-
-#
-# Public API
-#
 
 def open(file, mode='rt', *, encoding=None, errors=None, newline=None,
          external=False, parallel=False):

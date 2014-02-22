@@ -9,9 +9,10 @@ import os
 import pytest
 
 import zseqfile
+import zseqfile.zseqfile as _zseqfile
 
 
-def test_open(tmpdir):
+def test_reading(tmpdir):
 
     tmpdir = str(tmpdir)
 
@@ -56,8 +57,10 @@ def test_valid_mode():
 
 
 def test_which():
-    assert zseqfile.which('/bin/cat') == '/bin/cat'
-    assert zseqfile.which('cat') == '/bin/cat'
+    assert _zseqfile.which('/bin/cat') == '/bin/cat'
+    assert _zseqfile.which('cat') == '/bin/cat'
 
-    assert zseqfile.which('does-not-exist') is None
-    assert zseqfile.which('/does/not/exist') is None
+    assert _zseqfile.which('does-not-exist') is None
+    assert _zseqfile.which('/does/not/exist') is None
+
+
