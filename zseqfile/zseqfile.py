@@ -38,6 +38,13 @@ def which(executable):
     return None
 
 
+EXTERNAL_GZIP = which('gzip')
+EXTERNAL_PIGZ = which('pigz')
+EXTERNAL_BZIP2 = which('bzip2')
+EXTERNAL_PBZIP2 = which('pbzip2')
+EXTERNAL_XZ = which('xz')
+
+
 def make_process_wrapper(args, mode, encoding, errors, newline):
     process = subprocess.Popen(args, stdout=subprocess.PIPE)
     # FIXME: properly terminate the process when .close() is called
