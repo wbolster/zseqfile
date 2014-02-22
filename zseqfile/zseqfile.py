@@ -9,6 +9,10 @@ import subprocess
 SUPPORTED_MODES = {'rt', 'rb', 'wt', 'wb'}
 
 
+#
+# Helpers
+#
+
 def is_executable_file(path):
     """Check whether the specified path is an executable file."""
     return os.path.isfile(path) and os.access(path, os.X_OK)
@@ -50,6 +54,10 @@ def open_regular(file, mode, encoding, errors, newline, external, parallel):
         file, mode=mode, encoding=encoding, errors=errors, newline=newline)
 
 
+#
+# Gzip
+#
+
 def open_gzip(file, mode, encoding, errors, newline, external, parallel):
     executable = None
     if external:
@@ -66,6 +74,10 @@ def open_gzip(file, mode, encoding, errors, newline, external, parallel):
     return gzip.open(
         file, mode=mode, encoding=encoding, errors=errors, newline=newline)
 
+
+#
+# Bzip2
+#
 
 def open_bzip2(file, mode, encoding, errors, newline, external, parallel):
     executable = None
@@ -84,6 +96,10 @@ def open_bzip2(file, mode, encoding, errors, newline, external, parallel):
         file, mode=mode, encoding=encoding, errors=errors, newline=newline)
 
 
+#
+# XZ/LZMA
+#
+
 def open_lzma(file, mode, encoding, errors, newline, external, parallel):
     executable = None
     if external:
@@ -97,6 +113,10 @@ def open_lzma(file, mode, encoding, errors, newline, external, parallel):
     return lzma.open(
         file, mode=mode, encoding=encoding, errors=errors, newline=newline)
 
+
+#
+# Magic open() API
+#
 
 SUFFIX_MAP = {
     '.gz': open_gzip,
