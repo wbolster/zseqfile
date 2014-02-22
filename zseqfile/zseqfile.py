@@ -65,18 +65,28 @@ def open_regular(file, mode, encoding, errors, newline, external, parallel):
 # Gzip
 #
 
-def open_gzip(file, mode, encoding, errors, newline, external, parallel):
-    executable = None
-    if external:
-        if parallel:
-            executable = which('pigz')
-        if executable is None:
-            executable = which('gzip')
 
-    if executable is not None:
-        return make_process_wrapper(
-            [executable, '-c', '-d', file],
-            mode, encoding=encoding, errors=errors, newline=newline)
+def open_external_gzip(file, mode, encoding, errors, newline):
+    assert EXTERNAL_GZIP
+    return make_process_wrapper(
+        [EXTERNAL_GZIP, '-c', '-d', file],
+        mode, encoding, errors, newline)
+
+
+def open_external_pigz(file, mode, encoding, errors, newline):
+    assert EXTERNAL_PIGZ
+    return make_process_wrapper(
+        [EXTERNAL_PIGZ, '-c', '-d', file],
+        mode, encoding, errors, newline)
+
+
+def open_gzip(file, mode, encoding, errors, newline, external, parallel):
+    if external:
+        if parallel and EXTERNAL_PIGZ:
+            return open_external_pigz(file, mode, encoding, errors, newline)
+
+        if EXTERNAL_GZIP:
+            return open_external_gzip(file, mode, encoding, errors, newline)
 
     return gzip.open(
         file, mode=mode, encoding=encoding, errors=errors, newline=newline)
@@ -86,18 +96,27 @@ def open_gzip(file, mode, encoding, errors, newline, external, parallel):
 # Bzip2
 #
 
-def open_bzip2(file, mode, encoding, errors, newline, external, parallel):
-    executable = None
-    if external:
-        if parallel:
-            executable = which('pbzip2')
-        if executable is None:
-            executable = which('bzip2')
+def open_external_bzip2(file, mode, encoding, errors, newline):
+    assert EXTERNAL_BZIP2
+    return make_process_wrapper(
+        [EXTERNAL_BZIP2, '-c', '-d', file],
+        mode, encoding, errors, newline)
 
-    if executable is not None:
-        return make_process_wrapper(
-            [executable, '-c', '-d', file],
-            mode, encoding=encoding, errors=errors, newline=newline)
+
+def open_external_pbzip2(file, mode, encoding, errors, newline):
+    assert EXTERNAL_PBZIP2
+    return make_process_wrapper(
+        [EXTERNAL_PBZIP2, '-c', '-d', file],
+        mode, encoding, errors, newline)
+
+
+def open_bzip2(file, mode, encoding, errors, newline, external, parallel):
+    if external:
+        if parallel and EXTERNAL_PBZIP2:
+            return open_external_pbzip2(file, mode, encoding, errors, newline)
+
+        if EXTERNAL_BZIP2:
+            return open_external_bzip2(file, mode, encoding, errors, newline)
 
     return bz2.open(
         file, mode=mode, encoding=encoding, errors=errors, newline=newline)
@@ -107,15 +126,16 @@ def open_bzip2(file, mode, encoding, errors, newline, external, parallel):
 # XZ/LZMA
 #
 
-def open_lzma(file, mode, encoding, errors, newline, external, parallel):
-    executable = None
-    if external:
-        executable = which('xz')
+def open_external_xz(file, mode, encoding, errors, newline):
+    assert EXTERNAL_XZ
+    return make_process_wrapper(
+        [EXTERNAL_XZ, '-c', '-d', file],
+        mode, encoding, errors, newline)
 
-    if executable is not None:
-        return make_process_wrapper(
-            [executable, '-c', '-d', file],
-            mode, encoding=encoding, errors=errors, newline=newline)
+
+def open_lzma(file, mode, encoding, errors, newline, external, parallel):
+    if external and EXTERNAL_XZ:
+        return open_external_xz(file, mode, encoding, errors, newline)
 
     return lzma.open(
         file, mode=mode, encoding=encoding, errors=errors, newline=newline)
