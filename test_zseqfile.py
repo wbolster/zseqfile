@@ -12,6 +12,28 @@ import zseqfile
 import zseqfile.zseqfile as _zseqfile
 
 
+#
+# Test internal helpers
+#
+
+def test_which():
+    assert _zseqfile.which('/bin/cat') == '/bin/cat'
+    assert _zseqfile.which('cat') == '/bin/cat'
+
+    assert _zseqfile.which('does-not-exist') is None
+    assert _zseqfile.which('/does/not/exist') is None
+
+
+#
+# Test public API
+#
+
+
+def test_valid_mode():
+    with pytest.raises(ValueError):
+        zseqfile.open('', mode='x')
+
+
 def test_reading(tmpdir):
 
     tmpdir = str(tmpdir)
@@ -49,18 +71,3 @@ def test_reading(tmpdir):
         fp = zseqfile.open(fn, 'rb', external=external, parallel=parallel)
         assert fp.read() == data_binary
         fp.close()
-
-
-def test_valid_mode():
-    with pytest.raises(ValueError):
-        zseqfile.open('', mode='x')
-
-
-def test_which():
-    assert _zseqfile.which('/bin/cat') == '/bin/cat'
-    assert _zseqfile.which('cat') == '/bin/cat'
-
-    assert _zseqfile.which('does-not-exist') is None
-    assert _zseqfile.which('/does/not/exist') is None
-
-
