@@ -38,7 +38,9 @@ def test_reading(tmpdir):
 
     tmpdir = str(tmpdir)
 
-    data_text = "¡!"
+    line_1 = "¡!\n"
+    line_2 = "line 2\n"
+    data_text = line_1 + line_2
     data_binary = data_text.encode('UTF-8')
 
     regular_file = os.path.join(tmpdir, 'out')
@@ -64,7 +66,11 @@ def test_reading(tmpdir):
 
         # Text mode
         fp = zseqfile.open(fn, 'rt', external=external, parallel=parallel)
-        assert fp.read() == data_text
+        it = iter(fp)
+        assert next(it) == line_1
+        assert next(it) == line_2
+        with pytest.raises(StopIteration):
+            next(it)
         fp.close()
 
         # Binary mode
