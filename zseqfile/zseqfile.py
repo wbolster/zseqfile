@@ -45,14 +45,79 @@ EXTERNAL_PBZIP2 = which('pbzip2')
 EXTERNAL_XZ = which('xz')
 
 
-def make_process_wrapper(args, mode, encoding, errors, newline):
-    process = subprocess.Popen(args, stdout=subprocess.PIPE)
-    # FIXME: properly terminate the process when .close() is called
+class ProcessIOBase(object):
+    """
+    Shared functionality for the reader and writer classes.
+    """
+    def close(self):
+        if self._closed:
+            return
 
-    if 't' in mode:
-        return io.TextIOWrapper(process.stdout, encoding, errors, newline)
-    else:
-        return process.stdout
+        if self._should_close:
+            self._fp.close()
+
+        self._pipe.close()
+        self._process.terminate()
+        self._process.wait()
+        self._closed = True
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.close()
+        return False
+
+
+class ProcessIOReader(ProcessIOBase):
+    """
+    Readable file-like object that wraps an external process.
+    """
+    def __init__(self, args, file, mode, encoding=None, errors=None,
+                 newline=None):
+        assert mode in SUPPORTED_MODES
+        assert 'r' in mode
+
+        self._closed = False
+
+        if isinstance(file, str):
+            self._fp = io.open(file, mode='rb')
+            self._should_close = True
+        else:
+            self._fp = file
+            self._should_close = False
+
+        self._process = subprocess.Popen(
+            args,
+            stdin=self._fp,
+            stdout=subprocess.PIPE)
+        self._pipe = self._process.stdout
+
+        if 't' in mode:
+            self._pipe = io.TextIOWrapper(
+                self._pipe,
+                encoding=encoding,
+                errors=errors,
+                newline=newline)
+
+        # Expose API. TODO: Maybe add real stub methofs for these for
+        # documentation purposes.
+        self.readable = self._pipe.readable
+        self.read = self._pipe.read
+        self.readline = self._pipe.readline
+        self.readlines = self._pipe.readlines
+
+    def __iter__(self):
+        return iter(self._pipe)
+
+
+class ProcessIOWriter(ProcessIOBase):
+    """
+    Writable file-like object that wraps an external process.
+    """
+    def __init__(self, args, file, mode, encoding=None, errors=None,
+                 newline=None):
+        raise NotImplementedError()
 
 
 #
@@ -70,20 +135,17 @@ def open_regular(file, mode, encoding, errors, newline, external, parallel):
 #
 
 def open_external_gzip(file, mode, encoding, errors, newline):
-    assert EXTERNAL_GZIP
-    return make_process_wrapper(
-        [EXTERNAL_GZIP, '-c', '-d', file],
-        mode, encoding, errors, newline)
+    args = [EXTERNAL_GZIP, '-c', '-d']
+    return ProcessIOReader(args, file, mode, encoding, errors, newline)
 
 
 def open_external_pigz(file, mode, encoding, errors, newline):
-    assert EXTERNAL_PIGZ
-    return make_process_wrapper(
-        [EXTERNAL_PIGZ, '-c', '-d', file],
-        mode, encoding, errors, newline)
+    args = [EXTERNAL_PIGZ, '-c', '-d']
+    return ProcessIOReader(args, file, mode, encoding, errors, newline)
 
 
-def open_gzip(file, mode, encoding, errors, newline, external, parallel):
+def open_gzip(file, *, mode, encoding=None, errors=None, newline=None,
+              external=False, parallel=False):
     if external:
         if parallel and EXTERNAL_PIGZ:
             return open_external_pigz(file, mode, encoding, errors, newline)
@@ -100,17 +162,13 @@ def open_gzip(file, mode, encoding, errors, newline, external, parallel):
 #
 
 def open_external_bzip2(file, mode, encoding, errors, newline):
-    assert EXTERNAL_BZIP2
-    return make_process_wrapper(
-        [EXTERNAL_BZIP2, '-c', '-d', file],
-        mode, encoding, errors, newline)
+    args = [EXTERNAL_BZIP2, '-c', '-d']
+    return ProcessIOReader(args, file, mode, encoding, errors, newline)
 
 
 def open_external_pbzip2(file, mode, encoding, errors, newline):
-    assert EXTERNAL_PBZIP2
-    return make_process_wrapper(
-        [EXTERNAL_PBZIP2, '-c', '-d', file],
-        mode, encoding, errors, newline)
+    args = [EXTERNAL_PBZIP2, '-c', '-d']
+    return ProcessIOReader(args, file, mode, encoding, errors, newline)
 
 
 def open_bzip2(file, mode, encoding, errors, newline, external, parallel):
@@ -130,10 +188,8 @@ def open_bzip2(file, mode, encoding, errors, newline, external, parallel):
 #
 
 def open_external_xz(file, mode, encoding, errors, newline):
-    assert EXTERNAL_XZ
-    return make_process_wrapper(
-        [EXTERNAL_XZ, '-c', '-d', file],
-        mode, encoding, errors, newline)
+    args = [EXTERNAL_XZ, '-c', '-d']
+    return ProcessIOReader(args, file, mode, encoding, errors, newline)
 
 
 def open_lzma(file, mode, encoding, errors, newline, external, parallel):
@@ -168,4 +224,5 @@ def open(file, mode='rt', *, encoding=None, errors=None, newline=None,
         if file.endswith(suffix):
             opener = func
 
-    return opener(file, mode, encoding, errors, newline, external, parallel)
+    return opener(file, mode=mode, encoding=encoding, errors=errors,
+                  newline=newline, external=external, parallel=parallel)
