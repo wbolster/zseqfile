@@ -134,24 +134,16 @@ def open_regular(file, mode, encoding, errors, newline, external, parallel):
 # Gzip
 #
 
-def open_external_gzip(file, mode, encoding, errors, newline):
-    args = [EXTERNAL_GZIP, '-c', '-d']
-    return ProcessIOReader(args, file, mode, encoding, errors, newline)
-
-
-def open_external_pigz(file, mode, encoding, errors, newline):
-    args = [EXTERNAL_PIGZ, '-c', '-d']
-    return ProcessIOReader(args, file, mode, encoding, errors, newline)
-
-
 def open_gzip(file, *, mode, encoding=None, errors=None, newline=None,
               external=False, parallel=False):
     if external:
         if parallel and EXTERNAL_PIGZ:
-            return open_external_pigz(file, mode, encoding, errors, newline)
+            args = [EXTERNAL_PIGZ, '-c', '-d']
+            return ProcessIOReader(args, file, mode, encoding, errors, newline)
 
         if EXTERNAL_GZIP:
-            return open_external_gzip(file, mode, encoding, errors, newline)
+            args = [EXTERNAL_GZIP, '-c', '-d']
+            return ProcessIOReader(args, file, mode, encoding, errors, newline)
 
     return gzip.open(
         file, mode=mode, encoding=encoding, errors=errors, newline=newline)
@@ -161,23 +153,16 @@ def open_gzip(file, *, mode, encoding=None, errors=None, newline=None,
 # Bzip2
 #
 
-def open_external_bzip2(file, mode, encoding, errors, newline):
-    args = [EXTERNAL_BZIP2, '-c', '-d']
-    return ProcessIOReader(args, file, mode, encoding, errors, newline)
-
-
-def open_external_pbzip2(file, mode, encoding, errors, newline):
-    args = [EXTERNAL_PBZIP2, '-c', '-d']
-    return ProcessIOReader(args, file, mode, encoding, errors, newline)
-
-
-def open_bzip2(file, mode, encoding, errors, newline, external, parallel):
+def open_bzip2(file, *, mode, encoding=None, errors=None, newline=None,
+               external=False, parallel=False):
     if external:
         if parallel and EXTERNAL_PBZIP2:
-            return open_external_pbzip2(file, mode, encoding, errors, newline)
+            args = [EXTERNAL_PBZIP2, '-c', '-d']
+            return ProcessIOReader(args, file, mode, encoding, errors, newline)
 
         if EXTERNAL_BZIP2:
-            return open_external_bzip2(file, mode, encoding, errors, newline)
+            args = [EXTERNAL_BZIP2, '-c', '-d']
+            return ProcessIOReader(args, file, mode, encoding, errors, newline)
 
     return bz2.open(
         file, mode=mode, encoding=encoding, errors=errors, newline=newline)
@@ -187,14 +172,11 @@ def open_bzip2(file, mode, encoding, errors, newline, external, parallel):
 # XZ/LZMA
 #
 
-def open_external_xz(file, mode, encoding, errors, newline):
-    args = [EXTERNAL_XZ, '-c', '-d']
-    return ProcessIOReader(args, file, mode, encoding, errors, newline)
-
-
-def open_lzma(file, mode, encoding, errors, newline, external, parallel):
+def open_lzma(file, *, mode, encoding=None, errors=None, newline=None,
+              external=False, parallel=False):
     if external and EXTERNAL_XZ:
-        return open_external_xz(file, mode, encoding, errors, newline)
+        args = [EXTERNAL_XZ, '-c', '-d']
+        return ProcessIOReader(args, file, mode, encoding, errors, newline)
 
     return lzma.open(
         file, mode=mode, encoding=encoding, errors=errors, newline=newline)
