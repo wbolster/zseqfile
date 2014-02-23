@@ -27,7 +27,7 @@ Currently implemented
   
 * `open_gzip()`, `open_bzip2()`, `open_lzma()` that can either use the
   built-in Python modules, or delegate to external processes (including the
-  parallel version).
+  parallelized programs).
 
 * A `.open()` function that delegates to the right `open_*()` function based
   on the file name.
@@ -39,7 +39,7 @@ Issues, notes, todo, ideas
 * Writing support is not yet implemented
 
 * Only Python >= 3.3 is currently supported. Backporting only after this
-  projected has matured a bit more.
+  project has matured a bit more.
 
 * For external processes, only "real files" are supported (those with a
   `.fileno()`, custom "file like objects" are not.
